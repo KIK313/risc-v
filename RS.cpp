@@ -57,14 +57,15 @@ void reservation_station::work_clk(int cl) {
             new_cnt--; new_a[i].is_busy = 0;
             if (a[i].op == END) return;
             if (a[i].op == SB || a[i].op == SH || a[i].op == SW) {RoB->getst(a[i].dest, a[i].Vk); return;}
-            // for (int j = 0; j < 32; ++j) {
-            //     if (a[j].Qj == a[i].dest) {
-            //         new_a[j].Qj = 0; new_a[j].Vj = a[i].A;
-            //     }
-            //     if (a[j].Qk == a[i].dest) {
-            //         new_a[j].Qk = 0; new_a[j].Vk = a[i].A;
-            //     }
-            // }
+            for (int j = 0; j < 32; ++j) {
+                if (!a[j].is_busy) continue;
+                if (a[j].Qj == a[i].dest) {
+                    new_a[j].Qj = 0; new_a[j].Vj = a[i].A;
+                }
+                if (a[j].Qk == a[i].dest) {
+                    new_a[j].Qk = 0; new_a[j].Vk = a[i].A;
+                }
+            }
         } else if (a[i].Qj == 0 && a[i].Qk == 0 && !a[i].is_waiting) {
           //  std::cerr<<i<<" OoO2 "<<a[i].op<<std::endl;
             ls_type o;

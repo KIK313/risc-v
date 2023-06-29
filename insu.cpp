@@ -44,7 +44,7 @@ void instruction_unit::work_r_clk(int cl) {
     if (pc->is_rest()) return;
     if (pc->get_stop()) return;
     if (((r+1)&31) == l) {pc->move_pc(0); return;}
-    if (cl > 9999500)std::cerr<<pc->get_pc()<<" pc pos"<<std::endl;
+   // if (cl > 9999500)std::cerr<<pc->get_pc()<<" pc pos"<<std::endl;
     int pos = pc->get_pc()*8;
     int yy = 0;
     for (int i = 0; i < 32; ++i) yy |= (M[pos+i] <<i);
