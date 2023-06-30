@@ -1,4 +1,5 @@
 #include"RS.h"
+#include "predict.h"
 #include"regf.h"
 #include"control.h"
 #include"lstype.h"
@@ -15,8 +16,9 @@ void reorder_buffer::get_ready(int id, int val) {
 void reorder_buffer::getst(int id, int val) {
     new_a[id].dest = val;
 }
-void reorder_buffer::init(reservation_station* u, control* cc, register_file* w, memory* mm, program_counter* pp) {
-    rss = u; co = cc; rgf = w; memo = mm; pc = pp;
+void reorder_buffer::init(reservation_station* u, control* cc, 
+    register_file* w, memory* mm, program_counter* pp, predictor* rp) {
+    rss = u; co = cc; rgf = w; memo = mm; pc = pp; pr = rp;
 }
 bool reorder_buffer::is_full() {
     return (((r & 31) + 1) == l);
@@ -53,7 +55,8 @@ void reorder_buffer::clk_work(int cl) {
         case BLT: 
         case BGE: 
         case BLTU: 
-        case BGEU:if (a[l].val != a[l].dest) {pc->get_clear(a[l].an_pc); co->pre_wrong();} break;
+        case BGEU:  if (a[l].val) pr->increase(a[l].hs); else pr->decrease(a[l].hs); 
+            if (a[l].val != a[l].dest) {pc->get_clear(a[l].an_pc); co->pre_wrong();} break;
         case LB: rgf->commit_tag(a[l].rg_id, l, a[l].val); break;
         case LH: rgf->commit_tag(a[l].rg_id, l, a[l].val); break;
         case LW: rgf->commit_tag(a[l].rg_id, l, a[l].val); break;

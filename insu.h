@@ -6,6 +6,7 @@ class reorder_buffer;
 class reservation_station;
 class register_file;
 class control;
+class predictor;
 class instruction_unit {
 private:
     bool stp, new_stp;
@@ -17,10 +18,11 @@ private:
     register_file* rgf;
     program_counter* pc;
     control* co;
+    predictor* pr;
 public:
     instruction_unit();
     void init(bool * me, reorder_buffer* u, reservation_station* uu, 
-        register_file* rr, control* cc, program_counter* pc);
+        register_file* rr, control* cc, program_counter* pc, predictor* pr);
     void stop_ins();
     void work_r_clk(int cl);
     void check_src(int& V, int &Q, int rs);

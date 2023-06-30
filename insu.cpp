@@ -5,13 +5,14 @@
 #include"ROB.h"
 #include"RS.h"
 #include"regf.h"
+#include"predict.h"
 #include<iostream>
 instruction_unit::instruction_unit() {
     l = r = 0; L = R = 0; stp = new_stp = 0;
 }
 void instruction_unit::init(bool* me, reorder_buffer* u, 
-    reservation_station* uu, register_file* rr, control* cc, program_counter* pp) {
-    M = me; rob = u; rss = uu; rgf = rr; co = cc; pc = pp;
+    reservation_station* uu, register_file* rr, control* cc, program_counter* pp, predictor* rp) {
+    M = me; rob = u; rss = uu; rgf = rr; co = cc; pc = pp; pr = rp;
 }
 void instruction_unit::check_src(int &V, int &Q, int rs) {
     std::pair<bool, int> t; std::pair<bool, int> tt;
@@ -44,7 +45,7 @@ void instruction_unit::work_r_clk(int cl) {
     if (pc->is_rest()) return;
     if (pc->get_stop()) return;
     if (((r+1)&31) == l) {pc->move_pc(0); return;}
-   // if (cl > 9999500)std::cerr<<pc->get_pc()<<" pc pos"<<std::endl;
+ //  std::cerr<<pc->get_pc()<<" pc pos"<<std::endl;
     int pos = pc->get_pc()*8;
     int yy = 0;
     for (int i = 0; i < 32; ++i) yy |= (M[pos+i] <<i);
@@ -59,7 +60,7 @@ void instruction_unit::work_r_clk(int cl) {
     for (int i = 0; i < 5; ++i) dest |= (M[pos+7+i] << i);
     for (int i = 0; i < 5; ++i) rs1 |= (M[pos+15+i] << i);
     for (int i = 0; i < 5; ++i) rs2 |= (M[pos+20+i] << i);
-    inst o; int im = 0;
+    inst o; int im = 0; o.hs = 0;
   //  std::cerr<<x<<" OPOP "<<std::endl; 
     if (x == 55) { // lui
         o.op = LUI;
@@ -89,6 +90,9 @@ void instruction_unit::work_r_clk(int cl) {
         for (int i = 5; i <= 10; ++i) im |= (M[pos+20+i] << i);
         im |= (M[pos+7] << 11);
         im |= (M[pos+31] << 12);
+        for (int i = 0; i < 3; ++i) o.hs |= (M[pos+12+i] << i);
+        o.hs |= (M[pos+15] << 3); o.hs |= (M[pos+20] << 4);
+        o.hs |= (M[pos+7] << 5); o.hs |= (M[pos+8] << 6);  
         int r = 0;
         for (int i = 0 ; i < 3; ++i) r |= M[pos+12+i] << i;
         switch(r) {
@@ -157,11 +161,22 @@ void instruction_unit::work_r_clk(int cl) {
         }
     }
     o.A = im; o.val = pc->get_pc(); o.rs1 = rs1; o.rs2 = rs2; o.dest = dest;
-    new_a[r] = o; R = (r + 1) & 31; 
     if (o.op == JAL) pc->move_pc(o.A);
     else if (o.op == JALR) pc->stop_pc();
-    else if (o.op >= 4 && o.op <= 9) {pc->move_pc(o.A);}
+    else if (o.op >= 4 && o.op <= 9) { 
+      //  std::cerr<<o.op <<' '<<o.hs<<' '<<pr->get_state(o.hs)<<" OPOP"<<std::endl;
+        if (pr->get_state(o.hs)) {
+            o.hs = (o.hs << 1) | 1;
+            pc->move_pc(o.A);
+            o.val = o.val + 4;
+        } else {
+            o.hs = o.hs << 1;
+            pc->move_pc(4);
+            o.val = o.A + o.val;
+        }
+    }
     else pc->move_pc(4);
+    new_a[r] = o; R = (r + 1) & 31; 
     // if (cl > 9999500)
     //   std::cerr<<l<<' '<<r<<' '<<o.A<<' '<< o.op <<  " insu_read "<<o.dest<<' '<<o.rs1 <<' '<<o.rs2 <<' '<<o.val<<std::endl;
      } 
@@ -176,12 +191,12 @@ void instruction_unit::work_w_clk(int cl) {
     int pos = rob->getpl();
     inst o = a[l]; L = (l + 1) & 31;
     // if (cl> 9999500)
-    // std::cerr<<"INSU ISSUE "<<o.dest<<' '<<o.op<<std::endl;
+  //  std::cerr<<"INSU ISSUE "<<o.dest<<' '<<o.op<<std::endl;
     rob_entry u; res_entry v;
     v.is_busy = 1; v.is_prepared = 0; v.is_waiting = 0; u.is_ready = 0;
     u.op = o.op; v.op = o.op; v.dest = pos;
     u.an_pc = 0; u.dest = 1; u.val = 0; // u.dest may be linked with ben
-    u.rg_id = o.dest;
+    u.rg_id = o.dest; u.hs = (o.hs >> 1); 
     std::pair<bool, int> w;
     switch (o.op) {
         case LUI: v.A = o.A; v.Qj = v.Qk = 0; rgf->add_tag(o.dest, pos); break;
@@ -195,7 +210,7 @@ void instruction_unit::work_w_clk(int cl) {
         case BLT:
         case BGE:
         case BLTU:
-        case BGEU: u.an_pc = o.val + 4; check_src(v.Vj, v.Qj, o.rs1); check_src(v.Vk, v.Qk, o.rs2); break;
+        case BGEU: u.an_pc = o.val; u.dest = o.hs & 1; check_src(v.Vj, v.Qj, o.rs1); check_src(v.Vk, v.Qk, o.rs2); break;
         case LB: 
         case LH: 
         case LW: 

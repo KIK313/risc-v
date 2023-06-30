@@ -6,6 +6,7 @@ class reservation_station;
 class control;
 class register_file;
 class memory;
+class predictor;
 class program_counter;
 class reorder_buffer {
 private:
@@ -16,11 +17,13 @@ private:
     register_file* rgf;
     program_counter* pc;
     memory* memo;
+    predictor* pr;
 public:
     reorder_buffer();
     int st_ask();
     void get_ready(int id, int val);
-    void init(reservation_station* u, control* cc, register_file* w, memory* mm, program_counter* pp);
+    void init(reservation_station* u, control* cc, 
+    register_file* w, memory* mm, program_counter* pp, predictor* rp);
     void getst(int id, int val);
     std::pair<bool, int> ask(int id);
     bool is_full();

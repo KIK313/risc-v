@@ -23,11 +23,14 @@ struct rob_entry {
     optype op;
     int dest;
     int val;
-    int an_pc;    
+    int an_pc;
+    int hs;    
 };
 struct inst {
     optype op;
     int rs1, rs2, dest, val;
+    int hs; // 0 -> jump or not 
+            // 1--8 -> hs_value; 
     int A;
 };
 #endif
