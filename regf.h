@@ -5,8 +5,9 @@
 class control;
 class register_file {
 private:
-    int reg[32], new_reg[32]; int stt;
-    int tag[32], new_tag[32]; int new_stt;
+    int reg[32], new_reg[32]; int stt[2];
+    int tag[32][2], new_tag[32][2]; int new_stt[2];
+    int pos[32], new_pos[32]; int ps, new_ps;
     control* co;
 public:
     register_file();

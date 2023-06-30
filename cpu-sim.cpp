@@ -1,6 +1,7 @@
 #include<iostream>
 #include<cstdio>
 #include<cstring>
+#include<algorithm>
 #include"ALU.h"
 #include"control.h"
 #include"insu.h"
@@ -44,6 +45,7 @@ void store_memory() {
         }
     }
 }
+int a[8];
 int main() {
   //  freopen("a.in","r",stdin);
     memset(Mem, 0, sizeof(Mem));
@@ -54,21 +56,36 @@ int main() {
     pc.init(&co); rob.init(&rs, &co, &rf, &memo, &pc, &pr); rs.init(&rob, &al, &memo, &co, &pc);
     rf.init(&co);
     int cl = 0;
+    for (int i = 0; i < 8; ++i) a[i] = i;
   //  cerr<<cl<<" -100"<<endl;
     while (!co.ed()) {
+        random_shuffle(a,a+8);
+        for (int i = 0; i < 8; ++i) {
+            switch(a[i]) {
+                case 0: co.work_clk(); break;
+                case 1: iu.work_r_clk(cl); break;
+                case 2: iu.work_w_clk(cl); break;//cerr<<"4"<<endl; 
+                case 3: rob.clk_work(cl); break; //cerr<<"3"<<endl; 
+                case 4: memo.clk_work(); break; //cerr<<"5"<<endl;
+                case 5: pc.work_clk(); break; // cerr<<"6"<<endl; 
+                case 6: rs.work_clk(cl); break; //cerr<<"7"<<endl;
+                case 7: rf.work_clk(); break;
+            }
+        }
         cl ++;
-        co.work_clk(); //cerr<<"1"<<endl;
-        iu.work_r_clk(cl); //cerr<<"2"<<endl; 
-        rob.clk_work(cl); //cerr<<"3"<<endl; 
-        iu.work_w_clk(cl); //cerr<<"4"<<endl; 
-        memo.clk_work(); //cerr<<"5"<<endl;
-        pc.work_clk(); // cerr<<"6"<<endl; 
-        rs.work_clk(cl); //cerr<<"7"<<endl;
-        rf.work_clk();
-       // if (cl>9999500)   
-     //  cerr<<cl<<" CLOCK TIME -100"<<endl;
-        co.neg_edge(); iu.neg_edge(); memo.neg_edge(); pc.neg_edge();
-        rf.neg_edge(); rob.neg_edge(); rs.neg_edge(); pr.neg_edge();
+        random_shuffle(a, a+8);
+        for (int i = 0; i < 8; ++i) {
+            switch(a[i]) {
+                case 0: co.neg_edge(); break;
+                case 1: iu.neg_edge(); break;
+                case 2: memo.neg_edge(); break;
+                case 3: pc.neg_edge(); break;
+                case 4: rf.neg_edge(); break;
+                case 5: rob.neg_edge(); break;
+                case 6: rs.neg_edge(); break;
+                case 7: pr.neg_edge();break;
+            }
+        }   
     }    
    // cerr<<cl<<" -100"<<endl;    
    cout<<(rf.getans()&255);       
