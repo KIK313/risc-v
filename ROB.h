@@ -29,7 +29,7 @@ public:
     bool is_full();
     void insert(const rob_entry& o);
     void clear();
-    void clk_work(int cl);
+    void clk_work();
     void neg_edge();
     int getpl();
 };

@@ -23,7 +23,7 @@ public:
     void init(reorder_buffer* o, alunit* u, memory* w, control* cc, program_counter* pp);
     void ld_ready(int id, int val);
     void commit_st(int tag);
-    void work_clk(int cl);
+    void work_clk();
     void clear();
     void neg_edge();
 };

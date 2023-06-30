@@ -27,19 +27,15 @@ void store_memory() {
         int pos = 0;
         for (int i = 1; i < strlen(ch); ++i) pos = pos * 16 + HtoD(ch[i]);
         pos = pos * 8;
-        //std::cerr<<pos<<" -100\n";
         while(1) {
             if (scanf("%s", ch) == EOF) return; 
-            if (ch[0] == '@') break;
-            
+            if (ch[0] == '@') break;        
             int x = 0; 
             code[0] = ch[1]; code[1] = ch[0];
             scanf("%s", ch); code[2] = ch[1]; code[3] = ch[0];
             scanf("%s", ch); code[4] = ch[1]; code[5] = ch[0];
             scanf("%s", ch); code[6] = ch[1]; code[7] = ch[0];
             for (int i = 0; i < 8; ++i) x |= (HtoD(code[i]) << (4*i));
-            //if (pos == 4116 * 8) cerr << x << " IOI"<<endl;
-            //cerr<<x<<" check the instruction"<<endl;
             for (int i = 0; i < 32; ++i) Mem[pos+i] = (x >> i) & 1;
             pos += 32;
         }
@@ -57,18 +53,17 @@ int main() {
     rf.init(&co);
     int cl = 0;
     for (int i = 0; i < 8; ++i) a[i] = i;
-  //  cerr<<cl<<" -100"<<endl;
     while (!co.ed()) {
         random_shuffle(a,a+8);
         for (int i = 0; i < 8; ++i) {
             switch(a[i]) {
                 case 0: co.work_clk(); break;
-                case 1: iu.work_r_clk(cl); break;
-                case 2: iu.work_w_clk(cl); break;//cerr<<"4"<<endl; 
-                case 3: rob.clk_work(cl); break; //cerr<<"3"<<endl; 
-                case 4: memo.clk_work(); break; //cerr<<"5"<<endl;
-                case 5: pc.work_clk(); break; // cerr<<"6"<<endl; 
-                case 6: rs.work_clk(cl); break; //cerr<<"7"<<endl;
+                case 1: iu.work_r_clk(); break;
+                case 2: iu.work_w_clk(); break;
+                case 3: rob.clk_work(); break; 
+                case 4: memo.clk_work(); break; 
+                case 5: pc.work_clk(); break; 
+                case 6: rs.work_clk(); break; 
                 case 7: rf.work_clk(); break;
             }
         }
@@ -87,8 +82,6 @@ int main() {
             }
         }   
     }    
-   // cerr<<cl<<" -100"<<endl;    
-   cout<<(rf.getans()&255);       
-   // cerr<<(rf.getans()&255)<<" ANS"<<endl;
+    cout<<(rf.getans()&255);       
     return 0;
 }

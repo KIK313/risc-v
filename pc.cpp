@@ -44,7 +44,6 @@ void program_counter::work_clk() {
 }
 void program_counter::work_again(int pos) {
     new_is_restart = 1; new_rest = pos;
-  //  std::cerr<< pos <<" )){{}}"<<std::endl;
 }
 void program_counter::init(control* cc) {
     co = cc;

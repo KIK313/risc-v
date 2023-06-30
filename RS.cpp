@@ -38,21 +38,18 @@ void reservation_station::commit_st(int tag) {
 void reservation_station::remove_tag(int id, int val) {
     for (int i = 0; i < 32; ++i) {
         if (!a[i].is_busy) continue;
-     //   if (i == 0 && id ==3) {std::cerr<<" KKKKK"<<std::endl;}
         if (a[i].Qj == id) {new_a[i].Qj = 0; new_a[i].Vj = val;}
         if (a[i].Qk == id) {new_a[i].Qk = 0; new_a[i].Vk = val;}
     }
 }
-void reservation_station::work_clk(int cl) {
+void reservation_station::work_clk() {
     if (co->get_state()) {
         clear();
         return;
     }
-   // if (cl>9999500) std::cerr<<cnt<<" RS"<<std::endl;
     for (int i = 0; i < 32; ++i) {
         if (!a[i].is_busy) continue;
         if (a[i].is_prepared) {
-          //  std::cerr<<i<<" OoO1 "<<a[i].op<<std::endl;
             RoB->get_ready(a[i].dest, a[i].A);
             new_cnt--; new_a[i].is_busy = 0;
             if (a[i].op == END) return;
@@ -67,7 +64,6 @@ void reservation_station::work_clk(int cl) {
                 }
             }
         } else if (a[i].Qj == 0 && a[i].Qk == 0 && !a[i].is_waiting) {
-          //  std::cerr<<i<<" OoO2 "<<a[i].op<<std::endl;
             ls_type o;
             switch (a[i].op) {
                 case LUI: new_a[i].is_prepared = 1; break;
@@ -115,20 +111,14 @@ void reservation_station::work_clk(int cl) {
                 case END: new_a[i].is_prepared = 1; break;
             } 
         } else {
-    //         if (cl > 9999500)
-    // std::cerr<<i<<" OoO3 "<<a[i].dest<<' '<< a[i].op <<' '<<a[i].Qj <<' '<<a[i].Qk <<' '<< a[i].is_waiting<<std::endl;
             if (a[i].Qj) {
-               // std::cerr<<i<<" OoO4 "<<a[i].op<<std::endl;
                 std::pair<bool, int> t = RoB->ask(a[i].Qj);
-               // std::cerr<<i<<" OoO5 "<<a[i].op<<std::endl;
                 if (t.first) {
                     new_a[i].Qj = 0; new_a[i].Vj = t.second;
                 }
             }
             if (a[i].Qk && (a[i].op < 10 || a[i].op > 14)) {
-              //  std::cerr<<i<<" OoO6 "<<a[i].op <<' '<< a[i].Qk<<std::endl;
                 std::pair<bool, int> t = RoB->ask(a[i].Qk);
-               // std::cerr<<i<<" OoO7 "<<a[i].op<<std::endl;
                 if (t.first) {
                     new_a[i].Qk = 0; new_a[i].Vk = t.second;
                 }

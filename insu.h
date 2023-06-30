@@ -24,10 +24,9 @@ public:
     void init(bool * me, reorder_buffer* u, reservation_station* uu, 
         register_file* rr, control* cc, program_counter* pc, predictor* pr);
     void stop_ins();
-    void work_r_clk(int cl);
+    void work_r_clk();
     void check_src(int& V, int &Q, int rs);
-    void work_w_clk(int cl);
-    void work_again(int pos);
+    void work_w_clk();
     void neg_edge();
 };
 #endif

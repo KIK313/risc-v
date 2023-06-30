@@ -29,15 +29,11 @@ void reorder_buffer::insert(const rob_entry& o) {
 int reorder_buffer::getpl() {
     return r;
 }
-void reorder_buffer::clk_work(int cl) {
+void reorder_buffer::clk_work() {
     if (co->get_state()) {
         clear();
         return;
     }
-    // if (cl > 9999500) {
-    //     std::cerr<<l<<' '<<r<<" KIKAKAK"<<std::endl;
-    //     std::cerr<<a[l].op <<' '<< l << " work it? "<<a[l].is_ready <<std::endl;
-    // }
     if (l == r) return;
     if (!a[l].is_ready) return;
     if (a[l].op >= 15 && a[l].op <= 17) {
@@ -86,8 +82,6 @@ void reorder_buffer::clk_work(int cl) {
         case AND: rgf->commit_tag(a[l].rg_id, l, a[l].val); break;
         case END: co->come_to_end(); break;
     }
-   // std:: cerr<< l <<' '<<a[l].val <<" remove it"<<std::endl;
-   //if ()
     rss -> remove_tag(l, a[l].val);      
 }
 void reorder_buffer::clear() {
